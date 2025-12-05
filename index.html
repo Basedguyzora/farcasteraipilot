@@ -6,12 +6,15 @@
     <title>Farcaster AI Pilot</title>
     
     <!-- Farcaster Frame Meta Tag -->
-    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://0xBasedguy.github.io/farcaster-ai-pilot/preview.png","button":{"title":"Launch AI Pilot","action":{"type":"launch_frame","name":"Farcaster AI Pilot","url":"https://0xBasedguy.github.io/farcaster-ai-pilot","splashImageUrl":"https://YOUR-USERNAME.github.io/farcaster-ai-pilot/splash.png","splashBackgroundColor":"#8B5CF6"}}}' />
+    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://0xbasedguy.github.io/farcaster-ai-pilot/preview.png","button":{"title":"Launch AI Pilot","action":{"type":"launch_frame","name":"Farcaster AI Pilot","url":"https://0xBasedguy.github.io/farcaster-ai-pilot","splashImageUrl":"https://0xBasedguy.github.io/farcaster-ai-pilot/splash.png","splashBackgroundColor":"#8B5CF6"}}}' />
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Farcaster AI Pilot" />
     <meta property="og:description" content="AI-powered assistant for Farcaster. Ask anything!" />
     <meta property="og:image" content="https://0xBasedguy.github.io/farcaster-ai-pilot/preview.png" />
+    
+    <!-- Farcaster MiniApp SDK via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@farcaster/miniapp-sdk/dist/index.min.js"></script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,22 +41,34 @@
 <body>
     <div id="root"></div>
 
-    <!-- Farcaster MiniApp SDK via ESM -->
-    <script type="module">
-        import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk';
-        
-        // Make SDK available globally
-        window.farcasterSDK = sdk;
-        
-        // Call ready as soon as possible
-        (async () => {
-            try {
-                await sdk.actions.ready();
-                console.log('✅ Farcaster SDK ready!');
-                window.farcasterSDKReady = true;
-            } catch (error) {
-                console.log('ℹ️ Not in Farcaster context:', error);
-                window.farcasterSDKReady = true;
+    <!-- Initialize SDK IMMEDIATELY -->
+    <script>
+        (function() {
+            console.log('Initializing Farcaster SDK...');
+            
+            // Function to call ready
+            async function initializeSDK() {
+                try {
+                    // Check if SDK is loaded
+                    if (window.miniapp && window.miniapp.sdk) {
+                        await window.miniapp.sdk.actions.ready();
+                        console.log('✅ Farcaster SDK ready called successfully!');
+                        window.farcasterReady = true;
+                    } else {
+                        console.log('ℹ️ SDK not available, running in standalone mode');
+                        window.farcasterReady = true;
+                    }
+                } catch (error) {
+                    console.error('SDK initialization error:', error);
+                    window.farcasterReady = true;
+                }
+            }
+            
+            // Call ready as soon as DOM is loaded
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeSDK);
+            } else {
+                initializeSDK();
             }
         })();
     </script>
@@ -242,7 +257,7 @@
                                 <button
                                     onClick={handleSubmit}
                                     disabled={isLoading || !input.trim()}
-                                    className="bg-gradient-to-br from-purple-500 to-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:from-purple-600 hover:to-bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                                    className="bg-gradient-to-br from-purple-500 to-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
                                 >
                                     {isLoading ? (
                                         <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
